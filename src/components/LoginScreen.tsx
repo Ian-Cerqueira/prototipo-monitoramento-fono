@@ -1,33 +1,34 @@
 import { useState } from 'react';
-import { User } from '../App';
-import { Stethoscope } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Stethoscope, Loader2 } from 'lucide-react';
 
-interface LoginScreenProps {
-  onLogin: (user: User) => void;
-}
-
-export function LoginScreen({ onLogin }: LoginScreenProps) {
+export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock login - simula diferentes usuários
-    if (email.includes('estagiario')) {
-      onLogin({
-        id: '1',
-        name: 'João Silva',
-        role: 'estagiario',
-        email: email
+    setLoading(true);
+    setError('');
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-    } else {
-      onLogin({
-        id: '2',
-        name: 'Dra. Maria Santos',
-        role: 'professor',
-        email: email
-      });
+
+      if (error) {
+        if (error.message.includes('Invalid login')) {
+          throw new Error('E-mail ou senha incorretos.');
+        }
+        throw error;
+      }
+    } catch (err: any) {
+      setError(err.message || 'Ocorreu um erro ao fazer login.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,12 +41,18 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           </div>
         </div>
         
-        <h1 className="text-center text-gray-800 mb-2">Sistema de Prontuários</h1>
+        <h1 className="text-center text-gray-800 mb-2 font-bold text-2xl">Sistema de Prontuários</h1>
         <p className="text-center text-gray-600 mb-8">Clínica-Escola de Fonoaudiologia</p>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-gray-700 mb-2 font-medium">
               E-mail
             </label>
             <input
@@ -53,14 +60,15 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               placeholder="seu.email@exemplo.com"
               required
+              disabled={loading}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-gray-700 mb-2 font-medium">
               Senha
             </label>
             <input
@@ -68,30 +76,33 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
               placeholder="••••••••"
               required
+              disabled={loading}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed font-medium"
           >
-            Entrar
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              'Entrar'
+            )}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-600 mb-2">Usuários de teste:</p>
-          <div className="space-y-1 text-sm">
-            <p className="text-gray-700">
-              <strong>Estagiário:</strong> estagiario@exemplo.com
-            </p>
-            <p className="text-gray-700">
-              <strong>Professor:</strong> professor@exemplo.com
-            </p>
-          </div>
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+           <p className="text-xs text-gray-500">
+             Não tem conta? Fale com a coordenação.
+           </p>
         </div>
       </div>
     </div>
