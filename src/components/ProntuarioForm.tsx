@@ -178,8 +178,8 @@ export function ProntuarioForm({ prontuario, onSave, onCancel }: ProntuarioFormP
                   Avaliação Fonoaudiológica *
                 </label>
                 <textarea
-                  id="exameFisico"
-                  name="exameFisico"
+                  id="avaliacao_fono"
+                  name="avaliacao_fono"
                   value={formData.avaliacao_fono}
                   onChange={handleChange}
                   rows={4}
@@ -210,8 +210,8 @@ export function ProntuarioForm({ prontuario, onSave, onCancel }: ProntuarioFormP
                   Plano Terapêutico *
                 </label>
                 <textarea
-                  id="conduta"
-                  name="conduta"
+                  id="plano_terapeutico"
+                  name="plano_terapeutico"
                   value={formData.plano_terapeutico}
                   onChange={handleChange}
                   rows={4}

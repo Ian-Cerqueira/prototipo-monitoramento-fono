@@ -131,23 +131,47 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
   }
 
   const handleSaveProntuario = async (prontuario: Omit<Prontuario, 'id' | 'criadoPor' | 'criadoPorNome' | 'status'>) => {
+    const dadosProntuarioParaBanco = {
+      paciente_nome: prontuario.pacienteNome,
+      paciente_cpf: prontuario.pacienteCPF,
+      paciente_data_nascimento: prontuario.pacienteDataNascimento,
+      paciente_telefone: prontuario.pacienteTelefone,
+      data_atendimento: prontuario.dataAtendimento,
+      queixa_principal: prontuario.queixaPrincipal,
+      historia_doenca: prontuario.historiaDoenca,
+      avaliacao_fono: prontuario.avaliacao_fono,
+      hipotese_diagnostica: prontuario.hipoteseDiagnostica,
+      plano_terapeutico: prontuario.plano_terapeutico,
+      observacoes: prontuario.observacoes
+    };
+
     if (editingProntuario) {
       // Editar prontuário existente
-      const { error } = supabase
+      const { error } = await supabase
         .from('prontuarios')
-        .update
-        
+        .update(dadosProntuarioParaBanco)
+        .eq('id', editingProntuario.id);
+      
+        if(error) {
+          throw error;
+        }
+
     } else {
       // Criar novo prontuário
-      const newProntuario: Prontuario = {
-        ...prontuario,
-        id: Date.now().toString(),
-        criadoPor: user.id,
-        criadoPorNome: user.name,
-        status: 'pendente'
-      };
-      setProntuarios([newProntuario, ...prontuarios]);
+      const { error } = await supabase
+        .from('prontuarios')
+        .insert({
+          ...dadosProntuarioParaBanco,
+          criado_por: user.id,
+          criado_por_nome: user.name,
+          status: 'pendente'
+        })
+  
+        if(error) {
+          throw error;
+        }
     }
+    await fetchProntuarios(); // Recarrega a lista do banco
     setShowForm(false);
     setEditingProntuario(null);
   };
@@ -279,7 +303,7 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Avaliação Fonoaudiológica</p>
-                    <p className="text-gray-800 whitespace-pre-wrap">{selectedProntuario.exameFisico}</p>
+                    <p className="text-gray-800 whitespace-pre-wrap">{selectedProntuario.avaliacao_fono}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Hipótese Diagnóstica</p>
@@ -287,7 +311,7 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Plano Terapêutico</p>
-                    <p className="text-gray-800 whitespace-pre-wrap">{selectedProntuario.conduta}</p>
+                    <p className="text-gray-800 whitespace-pre-wrap">{selectedProntuario.plano_terapeutico}</p>
                   </div>
                   {selectedProntuario.observacoes && (
                     <div>
