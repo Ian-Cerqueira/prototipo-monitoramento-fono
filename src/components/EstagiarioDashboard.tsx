@@ -130,14 +130,13 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
     }
   }
 
-  const handleSaveProntuario = (prontuario: Omit<Prontuario, 'id' | 'criadoPor' | 'criadoPorNome' | 'status'>) => {
+  const handleSaveProntuario = async (prontuario: Omit<Prontuario, 'id' | 'criadoPor' | 'criadoPorNome' | 'status'>) => {
     if (editingProntuario) {
       // Editar prontuário existente
-      setProntuarios(prontuarios.map(p => 
-        p.id === editingProntuario.id 
-          ? { ...prontuario, id: p.id, criadoPor: user.id, criadoPorNome: user.name, status: 'pendente' as const }
-          : p
-      ));
+      const { error } = supabase
+        .from('prontuarios')
+        .update
+        
     } else {
       // Criar novo prontuário
       const newProntuario: Prontuario = {

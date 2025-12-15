@@ -18,9 +18,9 @@ export function ProntuarioForm({ prontuario, onSave, onCancel }: ProntuarioFormP
     dataAtendimento: prontuario?.dataAtendimento || new Date().toISOString().split('T')[0],
     queixaPrincipal: prontuario?.queixaPrincipal || '',
     historiaDoenca: prontuario?.historiaDoenca || '',
-    exameFisico: prontuario?.exameFisico || '',
+    avaliacao_fono: prontuario?.avaliacao_fono || '',
     hipoteseDiagnostica: prontuario?.hipoteseDiagnostica || '',
-    conduta: prontuario?.conduta || '',
+    plano_terapeutico: prontuario?.plano_terapeutico || '',
     observacoes: prontuario?.observacoes || ''
   });
 
@@ -180,7 +180,7 @@ export function ProntuarioForm({ prontuario, onSave, onCancel }: ProntuarioFormP
                 <textarea
                   id="exameFisico"
                   name="exameFisico"
-                  value={formData.exameFisico}
+                  value={formData.avaliacao_fono}
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
@@ -212,7 +212,7 @@ export function ProntuarioForm({ prontuario, onSave, onCancel }: ProntuarioFormP
                 <textarea
                   id="conduta"
                   name="conduta"
-                  value={formData.conduta}
+                  value={formData.plano_terapeutico}
                   onChange={handleChange}
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"

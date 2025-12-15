@@ -20,9 +20,9 @@ export interface Prontuario {
   pacienteTelefone: string;
   queixaPrincipal: string;
   historiaDoenca: string;
-  exameFisico: string;
+  avaliacao_fono: string;
   hipoteseDiagnostica: string;
-  conduta: string;
+  plano_terapeutico: string;
   observacoes: string;
   criadoPor: string;
   criadoPorNome: string;
