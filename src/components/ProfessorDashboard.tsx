@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { User, Prontuario } from '../App';
 import { LogOut, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { RevisionForm } from './RevisionForm';
+import { supabase } from '../lib/supabase';
 
 interface ProfessorDashboardProps {
   user: User;
@@ -9,109 +10,105 @@ interface ProfessorDashboardProps {
 }
 
 // Mock data - mesmos prontuários do estagiário
-const initialProntuarios: Prontuario[] = [
-  {
-    id: '1',
-    pacienteNome: 'Ana Paula Costa',
-    pacienteCPF: '123.456.789-00',
-    pacienteDataNascimento: '1985-03-15',
-    pacienteTelefone: '(11) 98765-4321',
-    queixaPrincipal: 'Rouquidão persistente há 3 meses',
-    historiaDoenca: 'Paciente professora de ensino fundamental relata rouquidão que se intensifica ao longo do dia, principalmente após muitas horas de aula. Nega dor ou desconforto à deglutição. Refere uso vocal intenso durante o trabalho sem técnicas de aquecimento vocal.',
-    avaliacao_fono: 'Qualidade vocal: rouca, soprosa. Pitch rebaixado. Loudness adequada. Ressonância equilibrada. Sem sinais de tensão cervical.',
-    hipoteseDiagnostica: 'Disfonia comportamental por uso vocal inadequado',
-    plano_terapeutico: 'Terapia vocal com técnicas de higiene vocal, exercícios de aquecimento e desaquecimento vocal. Orientações sobre hidratação e uso adequado da voz profissional. 12 sessões, 2x por semana.',
-    observacoes: 'Paciente orientada sobre a importância do repouso vocal. Sugerido avaliação otorrinolaringológica.',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-01',
-    status: 'aprovado',
-    feedback: 'Excelente anamnese! A conduta está adequada. Lembre-se de incluir orientações sobre postura durante o uso vocal.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-12-02'
-  },
-  {
-    id: '2',
-    pacienteNome: 'Miguel Henrique Santos',
-    pacienteCPF: '987.654.321-00',
-    pacienteDataNascimento: '2019-07-20',
-    pacienteTelefone: '(11) 91234-5678',
-    queixaPrincipal: 'Dificuldade na pronúncia de alguns sons',
-    historiaDoenca: 'Criança de 6 anos trazida pela mãe com queixa de troca de sons na fala. Apresenta dificuldade principalmente nos fonemas /r/ e /l/. Desenvolvimento motor e cognitivo adequados para a idade. Sem intercorrências no período gestacional ou perinatal.',
-    avaliacao_fono: 'Linguagem receptiva preservada. Vocabulário adequado para idade. Articulação: substituição sistemática de /r/ por /l/ (rotacismo). Motricidade orofacial sem alterações significativas. Respiração nasal.',
-    hipoteseDiagnostica: 'Transtorno fonológico - distúrbio articulatório',
-    plano_terapeutico: 'Terapia fonoaudiológica com foco em consciência fonológica e treino articulatório. Exercícios de motricidade orofacial. Orientação aos pais.',
-    observacoes: '',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-03',
-    status: 'pendente'
-  },
-  {
-    id: '3',
-    pacienteNome: 'Carlos Eduardo Mendes',
-    pacienteCPF: '456.789.123-00',
-    pacienteDataNascimento: '2017-11-08',
-    pacienteTelefone: '(11) 97654-3210',
-    queixaPrincipal: 'Gagueira',
-    historiaDoenca: 'Apresenta disfluências há 2 meses',
-    avaliacao_fono: 'Fala com bloqueios e repetições',
-    hipoteseDiagnostica: 'Gagueira do desenvolvimento',
-    plano_terapeutico: 'Terapia de fluência',
-    observacoes: 'Encaminhar para avaliação neurológica',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-04',
-    status: 'recusado',
-    feedback: 'História clínica insuficiente. Preciso de mais informações: quando começou exatamente? Há fatores desencadeantes? Como é o ambiente familiar? Qual o tipo de disfluência (bloqueios, prolongamentos, repetições)? Frequência e gravidade? Há consciência do problema pela criança? Por favor, refaça com anamnese completa e avaliação detalhada da fluência.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-12-05'
-  },
-  {
-    id: '4',
-    pacienteNome: 'Beatriz Oliveira Santos',
-    pacienteCPF: '321.654.987-00',
-    pacienteDataNascimento: '2020-03-15',
-    pacienteTelefone: '(11) 93456-7890',
-    queixaPrincipal: 'Atraso no desenvolvimento da linguagem',
-    historiaDoenca: 'Criança de 4 anos e 9 meses com histórico de poucas palavras e frases simples. Mãe relata que a criança comunica-se mais por gestos do que por palavras. Primeiras palavras surgiram apenas aos 2 anos e meio. Sem histórico de otites de repetição. Desenvolvimento motor adequado.',
-    avaliacao_fono: 'Vocabulário expressivo reduzido (aproximadamente 50 palavras). Produz frases de 2 elementos. Compreensão verbal preservada para idade. Atenção compartilhada presente. Contato visual adequado. Ausência de estereotipias.',
-    hipoteseDiagnostica: 'Atraso de linguagem expressiva',
-    plano_terapeutico: 'Terapia fonoaudiológica com estimulação de linguagem expressiva, ampliação de vocabulário e estruturação frasal. Orientação familiar para estimulação em ambiente domiciliar. Sessões 2x por semana.',
-    observacoes: 'Solicitada avaliação audiológica completa. Considerar avaliação neuropsicológica.',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-11-28',
-    status: 'aprovado',
-    feedback: 'Boa avaliação! A conduta está apropriada. Continue observando a evolução e documentando os progressos.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-11-29'
-  }
-];
+const { data, error } = await supabase
+      .from('prontuarios')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+const prontuariosFormatados = data.map((item: any) => ({
+  id: item.id,
+  pacienteNome: item.paciente_nome,
+  pacienteCPF: item.paciente_cpf,
+  pacienteDataNascimento: item.paciente_data_nascimento,
+  pacienteTelefone: item.paciente_telefone,
+  dataAtendimento: item.data_atendimento,
+  queixaPrincipal: item.queixa_principal,
+  historiaDoenca: item.historia_doenca,
+  avaliacao_fono: item.avaliacao_fono, 
+  hipoteseDiagnostica: item.hipotese_diagnostica,
+  plano_terapeutico: item.plano_terapeutico,
+  observacoes: item.observacoes,
+  criadoPor: item.criado_por,
+  criadoPorNome: item.criado_por_nome,
+  status: item.status,
+  feedback: item.feedback,
+  revisadoPor: item.revisado_por,
+  revisadoPorNome: item.revisado_por_nome,
+  dataRevisao: item.data_revisao
+}));
 
 export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) {
-  const [prontuarios, setProntuarios] = useState<Prontuario[]>(initialProntuarios);
+  const [prontuarios, setProntuarios] = useState<any>(prontuariosFormatados);
   const [selectedProntuario, setSelectedProntuario] = useState<Prontuario | null>(null);
   const [filter, setFilter] = useState<'todos' | 'pendente' | 'aprovado' | 'recusado'>('pendente');
 
-  const handleReview = (prontuarioId: string, status: 'aprovado' | 'recusado', feedback: string) => {
-    setProntuarios(prontuarios.map(p =>
-      p.id === prontuarioId
-        ? {
-            ...p,
-            status,
-            feedback,
-            revisadoPor: user.id,
-            revisadoPorNome: user.name,
-            dataRevisao: new Date().toISOString().split('T')[0]
-          }
-        : p
-    ));
-    setSelectedProntuario(null);
-  };
+  async function fetchProntuarios() {
+    try {
+      const { data, error } = await supabase
+        .from('prontuarios')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const prontuariosFormatados = data.map((item: any) => ({
+          id: item.id,
+          pacienteNome: item.paciente_nome,
+          pacienteCPF: item.paciente_cpf,
+          pacienteDataNascimento: item.paciente_data_nascimento,
+          pacienteTelefone: item.paciente_telefone,
+          dataAtendimento: item.data_atendimento,
+          queixaPrincipal: item.queixa_principal,
+          historiaDoenca: item.historia_doenca,
+          avaliacao_fono: item.avaliacao_fono, 
+          hipoteseDiagnostica: item.hipotese_diagnostica,
+          plano_terapeutico: item.plano_terapeutico,
+          observacoes: item.observacoes,
+          criadoPor: item.criado_por,
+          criadoPorNome: item.criado_por_nome,
+          status: item.status,
+          feedback: item.feedback,
+          revisadoPor: item.revisado_por,
+          revisadoPorNome: item.revisado_por_nome,
+          dataRevisao: item.data_revisao
+        }));
+        
+        setProntuarios(prontuariosFormatados);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar prontuários:', error);
+      alert('Erro ao carregar seus prontuários.');
+    }
+  }
+
+  const handleReview = async (prontuarioId: string, status: 'aprovado' | 'recusado', feedback: string) => {
+    try {
+      // 1. Envia para o Supabase (Banco de Dados)
+      const { error } = await supabase
+        .from('prontuarios')
+        .update({
+          status: status,
+          feedback: feedback,
+          // Mapeamento para snake_case (como está no banco)
+          revisado_por: user.id,
+          revisado_por_nome: user.name,
+          data_revisao: new Date().toISOString()
+        })
+        .eq('id', prontuarioId); // Onde o ID for igual ao do prontuário
+
+      if (error) throw error;
+      
+      // 3. Fecha a tela de detalhes
+      setSelectedProntuario(null);
+      alert(`Prontuário ${status} com sucesso!`);
+      fetchProntuarios();
+
+    } catch (error: any) {
+      console.error('Erro ao salvar revisão:', error);
+      alert('Erro ao salvar: ' + error.message);
+    }
+};
 
   const filteredProntuarios = filter === 'todos' 
     ? prontuarios 
@@ -238,7 +235,7 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
                   <div>
                     <h3 className="text-gray-800">{prontuario.pacienteNome}</h3>
                     <p className="text-sm text-gray-600">
-                      Atendimento em {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR')} por {prontuario.criadoPorNome}
+                      Atendimento em {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} por {prontuario.criadoPorNome}
                     </p>
                   </div>
                 </div>

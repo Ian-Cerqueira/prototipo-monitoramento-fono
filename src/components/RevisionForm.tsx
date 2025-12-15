@@ -49,7 +49,7 @@ export function RevisionForm({ prontuario, onReview, onCancel }: RevisionFormPro
           <div className="mb-6 pb-6 border-b border-gray-200">
             <h2 className="text-gray-800 mb-2">Informações do Atendimento</h2>
             <p className="text-gray-600">
-              Estagiário: {prontuario.criadoPorNome} • Data: {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR')}
+              Estagiário: {prontuario.criadoPorNome} • Data: {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
             </p>
           </div>
 
@@ -67,7 +67,7 @@ export function RevisionForm({ prontuario, onReview, onCancel }: RevisionFormPro
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Data de Nascimento</p>
-                  <p className="text-gray-800">{new Date(prontuario.pacienteDataNascimento).toLocaleDateString('pt-BR')}</p>
+                  <p className="text-gray-800">{new Date(prontuario.pacienteDataNascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Telefone</p>
@@ -90,8 +90,8 @@ export function RevisionForm({ prontuario, onReview, onCancel }: RevisionFormPro
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">Exame Físico</p>
-                  <p className="text-gray-800 whitespace-pre-wrap">{prontuario.exameFisico}</p>
+                  <p className="text-sm text-gray-600 mb-1">Avaliação Fonoaudiológica</p>
+                  <p className="text-gray-800 whitespace-pre-wrap">{prontuario.avaliacao_fono}</p>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -101,7 +101,7 @@ export function RevisionForm({ prontuario, onReview, onCancel }: RevisionFormPro
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600 mb-1">Plano Terapêutico</p>
-                  <p className="text-gray-800 whitespace-pre-wrap">{prontuario.conduta}</p>
+                  <p className="text-gray-800 whitespace-pre-wrap">{prontuario.plano_terapeutico}</p>
                 </div>
 
                 {prontuario.observacoes && (

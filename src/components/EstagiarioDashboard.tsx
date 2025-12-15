@@ -9,118 +9,54 @@ interface EstagiarioDashboardProps {
   onLogout: () => void;
 }
 
-// Mock data
-// const initialProntuarios: Prontuario[] = [
-//   {
-//     id: '1',
-//     pacienteNome: 'Ana Paula Costa',
-//     pacienteCPF: '123.456.789-00',
-//     pacienteDataNascimento: '1985-03-15',
-//     pacienteTelefone: '(11) 98765-4321',
-//     queixaPrincipal: 'Rouquidão persistente há 3 meses',
-//     historiaDoenca: 'Paciente professora de ensino fundamental relata rouquidão que se intensifica ao longo do dia, principalmente após muitas horas de aula. Nega dor ou desconforto à deglutição. Refere uso vocal intenso durante o trabalho sem técnicas de aquecimento vocal.',
-//     exameFisico: 'Qualidade vocal: rouca, soprosa. Pitch rebaixado. Loudness adequada. Ressonância equilibrada. Sem sinais de tensão cervical.',
-//     hipoteseDiagnostica: 'Disfonia comportamental por uso vocal inadequado',
-//     conduta: 'Terapia vocal com técnicas de higiene vocal, exercícios de aquecimento e desaquecimento vocal. Orientações sobre hidratação e uso adequado da voz profissional. 12 sessões, 2x por semana.',
-//     observacoes: 'Paciente orientada sobre a importância do repouso vocal. Sugerido avaliação otorrinolaringológica.',
-//     criadoPor: '1',
-//     criadoPorNome: 'João Silva',
-//     dataAtendimento: '2025-12-01',
-//     status: 'aprovado',
-//     feedback: 'Excelente anamnese! A conduta está adequada. Lembre-se de incluir orientações sobre postura durante o uso vocal.',
-//     revisadoPor: '2',
-//     revisadoPorNome: 'Dra. Maria Santos',
-//     dataRevisao: '2025-12-02'
-//   },
-//   {
-//     id: '2',
-//     pacienteNome: 'Miguel Henrique Santos',
-//     pacienteCPF: '987.654.321-00',
-//     pacienteDataNascimento: '2019-07-20',
-//     pacienteTelefone: '(11) 91234-5678',
-//     queixaPrincipal: 'Dificuldade na pronúncia de alguns sons',
-//     historiaDoenca: 'Criança de 6 anos trazida pela mãe com queixa de troca de sons na fala. Apresenta dificuldade principalmente nos fonemas /r/ e /l/. Desenvolvimento motor e cognitivo adequados para a idade. Sem intercorrências no período gestacional ou perinatal.',
-//     exameFisico: 'Linguagem receptiva preservada. Vocabulário adequado para idade. Articulação: substituição sistemática de /r/ por /l/ (rotacismo). Motricidade orofacial sem alterações significativas. Respiração nasal.',
-//     hipoteseDiagnostica: 'Transtorno fonológico - distúrbio articulatório',
-//     conduta: 'Terapia fonoaudiológica com foco em consciência fonológica e treino articulatório. Exercícios de motricidade orofacial. Orientação aos pais.',
-//     observacoes: '',
-//     criadoPor: '1',
-//     criadoPorNome: 'João Silva',
-//     dataAtendimento: '2025-12-03',
-//     status: 'pendente'
-//   },
-//   {
-//     id: '3',
-//     pacienteNome: 'Carlos Eduardo Mendes',
-//     pacienteCPF: '456.789.123-00',
-//     pacienteDataNascimento: '2017-11-08',
-//     pacienteTelefone: '(11) 97654-3210',
-//     queixaPrincipal: 'Gagueira',
-//     historiaDoenca: 'Apresenta disfluências há 2 meses',
-//     exameFisico: 'Fala com bloqueios e repetições',
-//     hipoteseDiagnostica: 'Gagueira do desenvolvimento',
-//     conduta: 'Terapia de fluência',
-//     observacoes: 'Encaminhar para avaliação neurológica',
-//     criadoPor: '1',
-//     criadoPorNome: 'João Silva',
-//     dataAtendimento: '2025-12-04',
-//     status: 'recusado',
-//     feedback: 'História clínica insuficiente. Preciso de mais informações: quando começou exatamente? Há fatores desencadeantes? Como é o ambiente familiar? Qual o tipo de disfluência (bloqueios, prolongamentos, repetições)? Frequência e gravidade? Há consciência do problema pela criança? Por favor, refaça com anamnese completa e avaliação detalhada da fluência.',
-//     revisadoPor: '2',
-//     revisadoPorNome: 'Dra. Maria Santos',
-//     dataRevisao: '2025-12-05'
-//   },
-//   {
-//     id: '4',
-//     pacienteNome: 'Beatriz Oliveira Santos',
-//     pacienteCPF: '321.654.987-00',
-//     pacienteDataNascimento: '2020-03-15',
-//     pacienteTelefone: '(11) 93456-7890',
-//     queixaPrincipal: 'Atraso no desenvolvimento da linguagem',
-//     historiaDoenca: 'Criança de 4 anos e 9 meses com histórico de poucas palavras e frases simples. Mãe relata que a criança comunica-se mais por gestos do que por palavras. Primeiras palavras surgiram apenas aos 2 anos e meio. Sem histórico de otites de repetição. Desenvolvimento motor adequado.',
-//     exameFisico: 'Vocabulário expressivo reduzido (aproximadamente 50 palavras). Produz frases de 2 elementos. Compreensão verbal preservada para idade. Atenção compartilhada presente. Contato visual adequado. Ausência de estereotipias.',
-//     hipoteseDiagnostica: 'Atraso de linguagem expressiva',
-//     conduta: 'Terapia fonoaudiológica com estimulação de linguagem expressiva, ampliação de vocabulário e estruturação frasal. Orientação familiar para estimulação em ambiente domiciliar. Sessões 2x por semana.',
-//     observacoes: 'Solicitada avaliação audiológica completa. Considerar avaliação neuropsicológica.',
-//     criadoPor: '1',
-//     criadoPorNome: 'João Silva',
-//     dataAtendimento: '2025-11-28',
-//     status: 'aprovado',
-//     feedback: 'Boa avaliação! A conduta está apropriada. Continue observando a evolução e documentando os progressos.',
-//     revisadoPor: '2',
-//     revisadoPorNome: 'Dra. Maria Santos',
-//     dataRevisao: '2025-11-29'
-//   }
-// ];
-
 export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps) {
-  // --- 1. ESTADOS (Mude o valor inicial para array vazio []) ---
-  const [prontuarios, setProntuarios] = useState<Prontuario[]>([]); // Começa vazio!
-  const [loading, setLoading] = useState(true); // Novo estado de loading
+  const [prontuarios, setProntuarios] = useState<Prontuario[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const [showForm, setShowForm] = useState(false);
   const [editingProntuario, setEditingProntuario] = useState<Prontuario | null>(null);
   const [selectedProntuario, setSelectedProntuario] = useState<Prontuario | null>(null);
 
-  // --- 2. O EFEITO (Roda assim que a tela abre) ---
   useEffect(() => {
     fetchProntuarios();
   }, []);
 
-  // --- 3. A FUNÇÃO DE BUSCA (Chama o Supabase) ---
   async function fetchProntuarios() {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('prontuarios')
         .select('*')
-        //.eq('criado_por', user.id)
+        //.eq('criado_por', user.id) // Descomente quando quiser filtrar
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       if (data) {
-        setProntuarios(data as any);
+        const prontuariosFormatados = data.map((item: any) => ({
+          id: item.id,
+          // Mapeamento Banco -> Interface
+          pacienteNome: item.paciente_nome,
+          pacienteCPF: item.paciente_cpf,
+          pacienteDataNascimento: item.paciente_data_nascimento,
+          pacienteTelefone: item.paciente_telefone,
+          dataAtendimento: item.data_atendimento,
+          queixaPrincipal: item.queixa_principal,
+          historiaDoenca: item.historia_doenca,
+          avaliacao_fono: item.avaliacao_fono, 
+          hipoteseDiagnostica: item.hipotese_diagnostica,
+          plano_terapeutico: item.plano_terapeutico,
+          observacoes: item.observacoes,
+          criadoPor: item.criado_por,
+          criadoPorNome: item.criado_por_nome,
+          status: item.status,
+          feedback: item.feedback,
+          revisadoPor: item.revisado_por, // Adicionei caso precise no futuro
+          revisadoPorNome: item.revisado_por_nome, // Adicionei caso precise no futuro
+          dataRevisao: item.data_revisao // Adicionei caso precise no futuro
+        }));
+        
+        setProntuarios(prontuariosFormatados);
       }
     } catch (error) {
       console.error('Erro ao buscar prontuários:', error);
@@ -131,6 +67,7 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
   }
 
   const handleSaveProntuario = async (prontuario: Omit<Prontuario, 'id' | 'criadoPor' | 'criadoPorNome' | 'status'>) => {
+    // Mapeamento Interface -> Banco
     const dadosProntuarioParaBanco = {
       paciente_nome: prontuario.pacienteNome,
       paciente_cpf: prontuario.pacienteCPF,
@@ -145,35 +82,38 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
       observacoes: prontuario.observacoes
     };
 
-    if (editingProntuario) {
-      // Editar prontuário existente
-      const { error } = await supabase
-        .from('prontuarios')
-        .update(dadosProntuarioParaBanco)
-        .eq('id', editingProntuario.id);
-      
-        if(error) {
-          throw error;
-        }
+    try {
+      if (editingProntuario) {
+        // Editar
+        const { error } = await supabase
+          .from('prontuarios')
+          .update(dadosProntuarioParaBanco)
+          .eq('id', editingProntuario.id);
+        
+        if(error) throw error;
 
-    } else {
-      // Criar novo prontuário
-      const { error } = await supabase
-        .from('prontuarios')
-        .insert({
-          ...dadosProntuarioParaBanco,
-          criado_por: user.id,
-          criado_por_nome: user.name,
-          status: 'pendente'
-        })
+      } else {
+        // Criar
+        const { error } = await supabase
+          .from('prontuarios')
+          .insert({
+            ...dadosProntuarioParaBanco,
+            criado_por: user.id,
+            criado_por_nome: user.name,
+            status: 'pendente'
+          });
   
-        if(error) {
-          throw error;
-        }
+        if(error) throw error;
+      }
+      
+      await fetchProntuarios();
+      setShowForm(false);
+      setEditingProntuario(null);
+      
+    } catch (error: any) {
+       console.error('Erro ao salvar:', error);
+       alert('Erro ao salvar: ' + error.message);
     }
-    await fetchProntuarios(); // Recarrega a lista do banco
-    setShowForm(false);
-    setEditingProntuario(null);
   };
 
   const handleEdit = (prontuario: Prontuario) => {
@@ -184,34 +124,25 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'aprovado':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'recusado':
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      default:
-        return <Clock className="w-5 h-5 text-yellow-600" />;
+      case 'aprovado': return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case 'recusado': return <XCircle className="w-5 h-5 text-red-600" />;
+      default: return <Clock className="w-5 h-5 text-yellow-600" />;
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'aprovado':
-        return 'Aprovado';
-      case 'recusado':
-        return 'Recusado';
-      default:
-        return 'Pendente';
+      case 'aprovado': return 'Aprovado';
+      case 'recusado': return 'Recusado';
+      default: return 'Pendente';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'aprovado':
-        return 'bg-green-100 text-green-800';
-      case 'recusado':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
+      case 'aprovado': return 'bg-green-100 text-green-800';
+      case 'recusado': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
     }
   };
 
@@ -277,7 +208,10 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Data de Nascimento</p>
-                    <p className="text-gray-800">{new Date(selectedProntuario.pacienteDataNascimento).toLocaleDateString('pt-BR')}</p>
+                    {/* CORREÇÃO 1: Timezone UTC */}
+                    <p className="text-gray-800">
+                      {new Date(selectedProntuario.pacienteDataNascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Telefone</p>
@@ -291,7 +225,10 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-600">Data do Atendimento</p>
-                    <p className="text-gray-800">{new Date(selectedProntuario.dataAtendimento).toLocaleDateString('pt-BR')}</p>
+                    {/* CORREÇÃO 2: Timezone UTC */}
+                    <p className="text-gray-800">
+                      {new Date(selectedProntuario.dataAtendimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Queixa Principal</p>
@@ -383,7 +320,8 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
                   <div>
                     <h3 className="text-gray-800">{prontuario.pacienteNome}</h3>
                     <p className="text-sm text-gray-600">
-                      Atendimento em {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR')}
+                      {/* CORREÇÃO 3: Timezone UTC */}
+                      Atendimento em {new Date(prontuario.dataAtendimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}
                     </p>
                   </div>
                 </div>
