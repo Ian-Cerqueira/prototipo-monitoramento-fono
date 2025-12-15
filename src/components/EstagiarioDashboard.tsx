@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Prontuario } from '../App';
 import { LogOut, Plus, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { ProntuarioForm } from './ProntuarioForm';
+import { supabase } from '../lib/supabase';
 
 interface EstagiarioDashboardProps {
   user: User;
@@ -9,94 +10,125 @@ interface EstagiarioDashboardProps {
 }
 
 // Mock data
-const initialProntuarios: Prontuario[] = [
-  {
-    id: '1',
-    pacienteNome: 'Ana Paula Costa',
-    pacienteCPF: '123.456.789-00',
-    pacienteDataNascimento: '1985-03-15',
-    pacienteTelefone: '(11) 98765-4321',
-    queixaPrincipal: 'Rouquidão persistente há 3 meses',
-    historiaDoenca: 'Paciente professora de ensino fundamental relata rouquidão que se intensifica ao longo do dia, principalmente após muitas horas de aula. Nega dor ou desconforto à deglutição. Refere uso vocal intenso durante o trabalho sem técnicas de aquecimento vocal.',
-    exameFisico: 'Qualidade vocal: rouca, soprosa. Pitch rebaixado. Loudness adequada. Ressonância equilibrada. Sem sinais de tensão cervical.',
-    hipoteseDiagnostica: 'Disfonia comportamental por uso vocal inadequado',
-    conduta: 'Terapia vocal com técnicas de higiene vocal, exercícios de aquecimento e desaquecimento vocal. Orientações sobre hidratação e uso adequado da voz profissional. 12 sessões, 2x por semana.',
-    observacoes: 'Paciente orientada sobre a importância do repouso vocal. Sugerido avaliação otorrinolaringológica.',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-01',
-    status: 'aprovado',
-    feedback: 'Excelente anamnese! A conduta está adequada. Lembre-se de incluir orientações sobre postura durante o uso vocal.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-12-02'
-  },
-  {
-    id: '2',
-    pacienteNome: 'Miguel Henrique Santos',
-    pacienteCPF: '987.654.321-00',
-    pacienteDataNascimento: '2019-07-20',
-    pacienteTelefone: '(11) 91234-5678',
-    queixaPrincipal: 'Dificuldade na pronúncia de alguns sons',
-    historiaDoenca: 'Criança de 6 anos trazida pela mãe com queixa de troca de sons na fala. Apresenta dificuldade principalmente nos fonemas /r/ e /l/. Desenvolvimento motor e cognitivo adequados para a idade. Sem intercorrências no período gestacional ou perinatal.',
-    exameFisico: 'Linguagem receptiva preservada. Vocabulário adequado para idade. Articulação: substituição sistemática de /r/ por /l/ (rotacismo). Motricidade orofacial sem alterações significativas. Respiração nasal.',
-    hipoteseDiagnostica: 'Transtorno fonológico - distúrbio articulatório',
-    conduta: 'Terapia fonoaudiológica com foco em consciência fonológica e treino articulatório. Exercícios de motricidade orofacial. Orientação aos pais.',
-    observacoes: '',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-03',
-    status: 'pendente'
-  },
-  {
-    id: '3',
-    pacienteNome: 'Carlos Eduardo Mendes',
-    pacienteCPF: '456.789.123-00',
-    pacienteDataNascimento: '2017-11-08',
-    pacienteTelefone: '(11) 97654-3210',
-    queixaPrincipal: 'Gagueira',
-    historiaDoenca: 'Apresenta disfluências há 2 meses',
-    exameFisico: 'Fala com bloqueios e repetições',
-    hipoteseDiagnostica: 'Gagueira do desenvolvimento',
-    conduta: 'Terapia de fluência',
-    observacoes: 'Encaminhar para avaliação neurológica',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-12-04',
-    status: 'recusado',
-    feedback: 'História clínica insuficiente. Preciso de mais informações: quando começou exatamente? Há fatores desencadeantes? Como é o ambiente familiar? Qual o tipo de disfluência (bloqueios, prolongamentos, repetições)? Frequência e gravidade? Há consciência do problema pela criança? Por favor, refaça com anamnese completa e avaliação detalhada da fluência.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-12-05'
-  },
-  {
-    id: '4',
-    pacienteNome: 'Beatriz Oliveira Santos',
-    pacienteCPF: '321.654.987-00',
-    pacienteDataNascimento: '2020-03-15',
-    pacienteTelefone: '(11) 93456-7890',
-    queixaPrincipal: 'Atraso no desenvolvimento da linguagem',
-    historiaDoenca: 'Criança de 4 anos e 9 meses com histórico de poucas palavras e frases simples. Mãe relata que a criança comunica-se mais por gestos do que por palavras. Primeiras palavras surgiram apenas aos 2 anos e meio. Sem histórico de otites de repetição. Desenvolvimento motor adequado.',
-    exameFisico: 'Vocabulário expressivo reduzido (aproximadamente 50 palavras). Produz frases de 2 elementos. Compreensão verbal preservada para idade. Atenção compartilhada presente. Contato visual adequado. Ausência de estereotipias.',
-    hipoteseDiagnostica: 'Atraso de linguagem expressiva',
-    conduta: 'Terapia fonoaudiológica com estimulação de linguagem expressiva, ampliação de vocabulário e estruturação frasal. Orientação familiar para estimulação em ambiente domiciliar. Sessões 2x por semana.',
-    observacoes: 'Solicitada avaliação audiológica completa. Considerar avaliação neuropsicológica.',
-    criadoPor: '1',
-    criadoPorNome: 'João Silva',
-    dataAtendimento: '2025-11-28',
-    status: 'aprovado',
-    feedback: 'Boa avaliação! A conduta está apropriada. Continue observando a evolução e documentando os progressos.',
-    revisadoPor: '2',
-    revisadoPorNome: 'Dra. Maria Santos',
-    dataRevisao: '2025-11-29'
-  }
-];
+// const initialProntuarios: Prontuario[] = [
+//   {
+//     id: '1',
+//     pacienteNome: 'Ana Paula Costa',
+//     pacienteCPF: '123.456.789-00',
+//     pacienteDataNascimento: '1985-03-15',
+//     pacienteTelefone: '(11) 98765-4321',
+//     queixaPrincipal: 'Rouquidão persistente há 3 meses',
+//     historiaDoenca: 'Paciente professora de ensino fundamental relata rouquidão que se intensifica ao longo do dia, principalmente após muitas horas de aula. Nega dor ou desconforto à deglutição. Refere uso vocal intenso durante o trabalho sem técnicas de aquecimento vocal.',
+//     exameFisico: 'Qualidade vocal: rouca, soprosa. Pitch rebaixado. Loudness adequada. Ressonância equilibrada. Sem sinais de tensão cervical.',
+//     hipoteseDiagnostica: 'Disfonia comportamental por uso vocal inadequado',
+//     conduta: 'Terapia vocal com técnicas de higiene vocal, exercícios de aquecimento e desaquecimento vocal. Orientações sobre hidratação e uso adequado da voz profissional. 12 sessões, 2x por semana.',
+//     observacoes: 'Paciente orientada sobre a importância do repouso vocal. Sugerido avaliação otorrinolaringológica.',
+//     criadoPor: '1',
+//     criadoPorNome: 'João Silva',
+//     dataAtendimento: '2025-12-01',
+//     status: 'aprovado',
+//     feedback: 'Excelente anamnese! A conduta está adequada. Lembre-se de incluir orientações sobre postura durante o uso vocal.',
+//     revisadoPor: '2',
+//     revisadoPorNome: 'Dra. Maria Santos',
+//     dataRevisao: '2025-12-02'
+//   },
+//   {
+//     id: '2',
+//     pacienteNome: 'Miguel Henrique Santos',
+//     pacienteCPF: '987.654.321-00',
+//     pacienteDataNascimento: '2019-07-20',
+//     pacienteTelefone: '(11) 91234-5678',
+//     queixaPrincipal: 'Dificuldade na pronúncia de alguns sons',
+//     historiaDoenca: 'Criança de 6 anos trazida pela mãe com queixa de troca de sons na fala. Apresenta dificuldade principalmente nos fonemas /r/ e /l/. Desenvolvimento motor e cognitivo adequados para a idade. Sem intercorrências no período gestacional ou perinatal.',
+//     exameFisico: 'Linguagem receptiva preservada. Vocabulário adequado para idade. Articulação: substituição sistemática de /r/ por /l/ (rotacismo). Motricidade orofacial sem alterações significativas. Respiração nasal.',
+//     hipoteseDiagnostica: 'Transtorno fonológico - distúrbio articulatório',
+//     conduta: 'Terapia fonoaudiológica com foco em consciência fonológica e treino articulatório. Exercícios de motricidade orofacial. Orientação aos pais.',
+//     observacoes: '',
+//     criadoPor: '1',
+//     criadoPorNome: 'João Silva',
+//     dataAtendimento: '2025-12-03',
+//     status: 'pendente'
+//   },
+//   {
+//     id: '3',
+//     pacienteNome: 'Carlos Eduardo Mendes',
+//     pacienteCPF: '456.789.123-00',
+//     pacienteDataNascimento: '2017-11-08',
+//     pacienteTelefone: '(11) 97654-3210',
+//     queixaPrincipal: 'Gagueira',
+//     historiaDoenca: 'Apresenta disfluências há 2 meses',
+//     exameFisico: 'Fala com bloqueios e repetições',
+//     hipoteseDiagnostica: 'Gagueira do desenvolvimento',
+//     conduta: 'Terapia de fluência',
+//     observacoes: 'Encaminhar para avaliação neurológica',
+//     criadoPor: '1',
+//     criadoPorNome: 'João Silva',
+//     dataAtendimento: '2025-12-04',
+//     status: 'recusado',
+//     feedback: 'História clínica insuficiente. Preciso de mais informações: quando começou exatamente? Há fatores desencadeantes? Como é o ambiente familiar? Qual o tipo de disfluência (bloqueios, prolongamentos, repetições)? Frequência e gravidade? Há consciência do problema pela criança? Por favor, refaça com anamnese completa e avaliação detalhada da fluência.',
+//     revisadoPor: '2',
+//     revisadoPorNome: 'Dra. Maria Santos',
+//     dataRevisao: '2025-12-05'
+//   },
+//   {
+//     id: '4',
+//     pacienteNome: 'Beatriz Oliveira Santos',
+//     pacienteCPF: '321.654.987-00',
+//     pacienteDataNascimento: '2020-03-15',
+//     pacienteTelefone: '(11) 93456-7890',
+//     queixaPrincipal: 'Atraso no desenvolvimento da linguagem',
+//     historiaDoenca: 'Criança de 4 anos e 9 meses com histórico de poucas palavras e frases simples. Mãe relata que a criança comunica-se mais por gestos do que por palavras. Primeiras palavras surgiram apenas aos 2 anos e meio. Sem histórico de otites de repetição. Desenvolvimento motor adequado.',
+//     exameFisico: 'Vocabulário expressivo reduzido (aproximadamente 50 palavras). Produz frases de 2 elementos. Compreensão verbal preservada para idade. Atenção compartilhada presente. Contato visual adequado. Ausência de estereotipias.',
+//     hipoteseDiagnostica: 'Atraso de linguagem expressiva',
+//     conduta: 'Terapia fonoaudiológica com estimulação de linguagem expressiva, ampliação de vocabulário e estruturação frasal. Orientação familiar para estimulação em ambiente domiciliar. Sessões 2x por semana.',
+//     observacoes: 'Solicitada avaliação audiológica completa. Considerar avaliação neuropsicológica.',
+//     criadoPor: '1',
+//     criadoPorNome: 'João Silva',
+//     dataAtendimento: '2025-11-28',
+//     status: 'aprovado',
+//     feedback: 'Boa avaliação! A conduta está apropriada. Continue observando a evolução e documentando os progressos.',
+//     revisadoPor: '2',
+//     revisadoPorNome: 'Dra. Maria Santos',
+//     dataRevisao: '2025-11-29'
+//   }
+// ];
 
 export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps) {
-  const [prontuarios, setProntuarios] = useState<Prontuario[]>(initialProntuarios);
+  // --- 1. ESTADOS (Mude o valor inicial para array vazio []) ---
+  const [prontuarios, setProntuarios] = useState<Prontuario[]>([]); // Começa vazio!
+  const [loading, setLoading] = useState(true); // Novo estado de loading
+  
   const [showForm, setShowForm] = useState(false);
   const [editingProntuario, setEditingProntuario] = useState<Prontuario | null>(null);
   const [selectedProntuario, setSelectedProntuario] = useState<Prontuario | null>(null);
+
+  // --- 2. O EFEITO (Roda assim que a tela abre) ---
+  useEffect(() => {
+    fetchProntuarios();
+  }, []);
+
+  // --- 3. A FUNÇÃO DE BUSCA (Chama o Supabase) ---
+  async function fetchProntuarios() {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('prontuarios')
+        .select('*')
+        //.eq('criado_por', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setProntuarios(data as any);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar prontuários:', error);
+      alert('Erro ao carregar seus prontuários.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleSaveProntuario = (prontuario: Omit<Prontuario, 'id' | 'criadoPor' | 'criadoPorNome' | 'status'>) => {
     if (editingProntuario) {
