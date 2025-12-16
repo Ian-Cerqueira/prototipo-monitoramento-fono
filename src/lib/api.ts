@@ -1,56 +1,53 @@
 import { supabase } from "./supabase";
 
+export type IntegrationResult = {
+  success: boolean;
+  message: string;
+  action?: 'LOGIN_REQUIRED' | 'CHECK_CPF' | 'RETRY' | 'NONE';
+};
 
-export async function connectToEdge(prontuarioId: string): Promise<{}> {
-    //const edge_function_url = 'https://fesxpuopelzwjuwpkinw.supabase.co/functions/v1/postTiSaude';
-    try {
-        const { data, error } = await supabase.functions.invoke('postTiSaude', {
-            body: { record_id: prontuarioId }
-        });
+export async function connectToEdge(prontuarioId: string): Promise<IntegrationResult> {
+  try {
+    console.log(`📡 Enviando prontuário ${prontuarioId}...`);
 
-        if(error) {
-            console.log('erro na execucao da edge function');
-            let errorMessage = '';
-            if(error instanceof Error) {
-                errorMessage = error.message;
-            }
+    // Agora o 'error' só vem se a internet cair ou o servidor explodir (500)
+    // Erros de negócio (Login, CPF) virão dentro de 'data'
+    const { data, error } = await supabase.functions.invoke('postTiSaude', {
+      body: { record_id: prontuarioId }
+    });
 
-            if (errorMessage.includes("não conectou") || errorMessage.includes("Token")) {
-                return {
-                    success: false,
-                    message: "Você precisa conectar sua conta do TiSaude antes de aprovar.",
-                    action: 'LOGIN_REQUIRED'
-                };
-            }
-
-            if (errorMessage.includes("não encontrado") || errorMessage.includes("CPF")) {
-                return {
-                    success: false,
-                    message: "O CPF deste paciente não foi encontrado no TiSaude. Verifique o cadastro.",
-                    action: 'CHECK_CPF'
-                };
-            }
-
-            return {
-                success: false,
-                message: "outro Erro durante a execucao da edge function",
-                action: 'RETRY'
-            };
-        
-        }
-
-        return {
-            success: true,
-            message: "Documento enviado para o tisaude",
-            action: 'NONE'
-        };
-
-    } catch(err: any) {
-        console.log('erro em conexão a edge function', err);
-        return {
-            success: false,
-            message: "Erro na conexão com a edge function",
-            action: 'RETRY'
-        };
+    if (error) {
+      console.error('❌ Erro de Infraestrutura:', error);
+      return { success: false, message: "Falha de conexão com o servidor.", action: 'RETRY' };
     }
+
+    if (data && data.success === false) {
+      const msg = data.error || "Erro desconhecido";
+      console.warn("⚠️ Erro de Negócio retornado:", msg);
+
+      if (msg.includes("401") || msg.includes("TiSaude") || msg.includes("Token")) {
+        return {
+           success: false, 
+           message: "Sessão do TiSaude expirada. Faça login novamente.", 
+           action: 'LOGIN_REQUIRED' 
+        };
+      }
+
+      if (msg.includes("CPF") || msg.includes("encontrado")) {
+        return { 
+           success: false, 
+           message: "CPF não encontrado no sistema externo.", 
+           action: 'CHECK_CPF' 
+        };
+      }
+
+      return { success: false, message: msg, action: 'RETRY' };
+    }
+
+    return { success: true, message: "Integração realizada com sucesso!", action: 'NONE' };
+
+  } catch (err: any) {
+    console.error('Erro local:', err);
+    return { success: false, message: "Erro inesperado na aplicação.", action: 'RETRY' };
+  }
 }
