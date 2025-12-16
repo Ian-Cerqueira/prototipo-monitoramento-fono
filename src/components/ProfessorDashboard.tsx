@@ -10,7 +10,7 @@ interface ProfessorDashboardProps {
   user: User;
   onLogout: () => void;
 }
-
+//
 export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) {
   // Estado dos dados
   const [prontuarios, setProntuarios] = useState<any[]>([]);
