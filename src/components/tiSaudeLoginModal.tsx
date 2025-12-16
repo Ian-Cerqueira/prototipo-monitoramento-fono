@@ -1,7 +1,6 @@
 import { useState } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { supabase } from '../lib/supabase';
-// Certifique-se que o caminho abaixo está correto para o seu projeto
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -9,7 +8,8 @@ import { Label } from './ui/label';
 interface TiSaudeLoginModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess?: () => void;
+  // O modal devolve o token (string) para quem o chamou
+  onSuccess: (token: string) => void; 
 }
 
 export function TiSaudeLoginModal({ open, onOpenChange, onSuccess }: TiSaudeLoginModalProps) {
@@ -24,119 +24,87 @@ export function TiSaudeLoginModal({ open, onOpenChange, onSuccess }: TiSaudeLogi
     setErrorMsg('');
 
     try {
-      const { data, error } = await supabase.functions.invoke('login-externo', {
-        body: { 
-            email_externo: login, 
-            senha_externa: password 
-        }
+      // 1. Chama a Edge Function apenas para pegar o token
+      const { data, error } = await supabase.functions.invoke('hyper-task', {
+        body: { login: login, password: password }
       });
 
       if (error) throw error;
-      if (data && data.error) throw new Error(data.error);
+      if (!data || !data.token) throw new Error('Token não retornado pela API.');
 
-      alert("✅ Conectado com sucesso!");
+      console.log("✅ [Modal] Token capturado. Devolvendo ao Dashboard...");
+
+      // 2. Passa o token para o componente pai e fecha
+      onSuccess(data.token);
       onOpenChange(false);
-      if (onSuccess) onSuccess();
 
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "Credenciais inválidas.");
+      const msg = err.context?.json?.error || err.message || "Erro ao fazer login.";
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        // 1. BLOQUEIOS: Impede fechar clicando fora ou apertando ESC
-        onPointerDownOutside={(e) => e.preventDefault()} 
-        onEscapeKeyDown={(e) => e.preventDefault()}
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[9998] bg-black/90" />
         
-        // 2. CSS AGRESSIVO:
-        className="
-          /* POSICIONAMENTO: Força o centro da tela ignorando animações */
-          fixed 
-          top-[50%] 
-          left-[50%] 
-          !translate-x-[-50%] 
-          !translate-y-[-50%] 
-          z-50
-
-          /* FORMATO RETRATO (Estilo Mobile Card): */
-          w-[90vw]       /* Ocupa 90% da tela no celular */
-          max-w-[320px]  /* Trava em 320px no desktop (bem estreito/alto) */
-          rounded-xl 
-          border 
-          bg-white 
-          shadow-2xl 
-          p-0 
-          gap-0
-
-          /* REMOVE O BOTÃO 'X': Esconde qualquer botão filho direto do container */
-          [&>button]:hidden
-        "
-      >
-        
-        {/* Cabeçalho */}
-        <div className="bg-slate-50 px-6 py-8 border-b border-slate-100 flex flex-col items-center text-center rounded-t-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800 text-center">
-              Integração TiSaude
-            </DialogTitle>
-            <DialogDescription className="text-slate-500 mt-3 text-sm text-center leading-relaxed">
-              Para sua segurança, faça login para continuar aprovando prontuários.
-            </DialogDescription>
-          </DialogHeader>
-        </div>
-
-        {/* Formulário */}
-        <form onSubmit={handleLogin} className="p-6 grid gap-6">
-          
-          <div className="grid gap-2">
-            <Label htmlFor="ts-login" className="text-slate-700 font-semibold ml-1">
-              Usuário
-            </Label>
-            <Input
-              id="ts-login"
-              type="text" 
-              placeholder="Ex: professor.silva"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              required
-              className="h-12 text-lg" // Input mais alto para toque
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="ts-password"className="text-slate-700 font-semibold ml-1">
-              Senha
-            </Label>
-            <Input
-              id="ts-password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="h-12 text-lg"
-            />
+        <DialogPrimitive.Content
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="
+            fixed left-[50%] top-[50%] z-[9999]
+            w-[90vw] max-w-[350px]
+            translate-x-[-50%] translate-y-[-50%]
+            rounded-xl bg-white shadow-2xl border border-gray-200 focus:outline-none
+          "
+        >
+          <div className="bg-slate-900 px-6 py-6 rounded-t-xl text-center">
+            <DialogPrimitive.Title className="text-xl font-bold text-white m-0">
+              Login TiSaude
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="text-slate-300 mt-2 text-sm m-0">
+              Sessão expirada. Autentique-se para continuar.
+            </DialogPrimitive.Description>
           </div>
 
-          {errorMsg && (
-            <div className="text-sm text-red-600 font-medium text-center bg-red-50 p-3 rounded-md border border-red-100">
-              {errorMsg}
+          <form onSubmit={handleLogin} className="p-6 grid gap-4">
+            <div className="grid gap-2">
+              <Label className="text-slate-700 font-bold">Usuário</Label>
+              <Input
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
+                className="h-11 border-slate-400"
+                required
+              />
             </div>
-          )}
 
-          <DialogFooter className="mt-2">
-            {/* Apenas o botão de conectar. Botão cancelar foi removido. */}
-            <Button type="submit" disabled={loading} className="w-full h-12 text-base font-bold shadow-md">
-              {loading ? 'Verificando...' : 'Entrar no Sistema'}
+            <div className="grid gap-2">
+              <Label className="text-slate-700 font-bold">Senha</Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 border-slate-400"
+                required
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="text-red-600 text-sm font-bold text-center bg-red-100 p-2 rounded">
+                {errorMsg}
+              </div>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 text-lg">
+              {loading ? 'Autenticando...' : 'ENTRAR'}
             </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
