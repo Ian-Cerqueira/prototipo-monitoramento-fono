@@ -3,6 +3,7 @@ import { User, Prontuario } from '../App';
 import { LogOut, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { RevisionForm } from './RevisionForm';
 import { supabase } from '../lib/supabase';
+import { connectToEdge } from '../lib/api';
 
 interface ProfessorDashboardProps {
   user: User;
@@ -82,25 +83,41 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
     }
   }
 
+  async function handleApi(prontuarioId: string) {
+    const res : {} = await connectToEdge(prontuarioId);
+    return res;
+  }
+
   const handleReview = async (prontuarioId: string, status: 'aprovado' | 'recusado', feedback: string) => {
     try {
-      // 1. Envia para o Supabase (Banco de Dados)
       const { error } = await supabase
         .from('prontuarios')
         .update({
           status: status,
           feedback: feedback,
-          // Mapeamento para snake_case (como está no banco)
           revisado_por: user.id,
           revisado_por_nome: user.name,
           data_revisao: new Date().toISOString()
         })
-        .eq('id', prontuarioId); // Onde o ID for igual ao do prontuário
+        .eq('id', prontuarioId);
 
       if (error) throw error;
       
-      // 3. Fecha a tela de detalhes
       setSelectedProntuario(null);
+      // conexão com o backend vem aqui
+      // envia o id do prontuário ()
+      const nextMove : {} = await handleApi(prontuarioId);
+      if(nextMove.action === "RETRY") {
+        alert(nextMove.message);
+      }
+      if(nextMove.action === "LOGIN_REQUIRED") {
+        //modal de colocar as credenciais do ti saude
+
+      }
+      if(nextMove.action === "CHECK_CPF") {
+        alert(nextMove.message);
+      }
+
       alert(`Prontuário ${status} com sucesso!`);
       fetchProntuarios();
 
