@@ -16,12 +16,7 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
   const [prontuarios, setProntuarios] = useState<any[]>([]);
   const [selectedProntuario, setSelectedProntuario] = useState<Prontuario | null>(null);
   const [filter, setFilter] = useState<'todos' | 'pendente' | 'aprovado' | 'recusado'>('pendente');
-  
-  // Estado do Modal
   const [showLoginModal, setShowLoginModal] = useState(false);
-  
-  // NOVO: Guarda o ID do prontuário que ficou pendente enquanto fazemos login
-  const [pendingRetryId, setPendingRetryId] = useState<string | null>(null);
 
   // Busca inicial dos dados
   async function fetchProntuarios() {
@@ -76,6 +71,7 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
 
   // --- REVIEW LOGIC ---
   const handleReview = async (prontuarioId: string, status: 'aprovado' | 'recusado', feedback: string) => {
+    await fetchProntuarios();
     try {
       // 1. Salva no banco primeiro (Garante que status/feedback fiquem salvos)
       const { error } = await supabase
@@ -91,20 +87,17 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
 
       if (error) throw error;
       
-      // 2. Se aprovado, tenta integrar com API
-      if (status === 'aprovado') {
-          const nextMove = await handleApi(prontuarioId);
-          
-          if(nextMove.action === "RETRY") {
-            alert("Erro técnico na integração: " + nextMove.message);
-          }
-          
-          // --- CORREÇÃO DO CONGELAMENTO ---
-          if(nextMove.action === "LOGIN_REQUIRED") {
-            console.log("🔒 Login necessário. Salvando estado e abrindo modal...");
-            
-            // a) Guarda o ID para usar depois do login
-            setPendingRetryId(prontuarioId);
+      
+      // conexão com o backend vem aqui
+      // envia o id do prontuário ()
+      const nextMove : {} = await handleApi(prontuarioId);
+      console.log(nextMove.action);
+      if(nextMove.action === "RETRY") {
+        alert(nextMove.message);
+      }
+      if(nextMove.action === "LOGIN_REQUIRED") {
+        //modal de colocar as credenciais do ti saude
+        setShowLoginModal(true);
 
             // b) Fecha o formulário para destravar a interface de fundo
             setSelectedProntuario(null);
@@ -127,9 +120,9 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
           alert(`Prontuário recusado.`);
       }
 
-      // 3. Limpeza padrão (Só chega aqui se não tiver caído no return do Login)
+      alert(`Prontuário ${status} com sucesso!`);
       setSelectedProntuario(null);
-      fetchProntuarios();
+      await fetchProntuarios();
 
     } catch (error: any) {
       console.error('Erro ao salvar revisão:', error);
@@ -289,14 +282,15 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
             </div>
           </main>
         </div>
-      )}
-
-      {/* 2. MODAL FLUTUANTE GLOBAL */}
-      <TiSaudeLoginModal 
-        open={showLoginModal} 
-        onOpenChange={setShowLoginModal}
-        onSuccess={handleTokenReceived}
-      />
-    </>
+      </main>
+        <TiSaudeLoginModal 
+          open={showLoginModal} 
+          onOpenChange={setShowLoginModal}
+          onSuccess={() => {
+            // Opcional: Avisar que deu certo
+            alert("Conexão realizada! Pode aprovar novamente.");
+          }}
+        />
+    </div>
   );
 }
