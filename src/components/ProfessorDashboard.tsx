@@ -4,6 +4,7 @@ import { LogOut, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { RevisionForm } from './RevisionForm';
 import { supabase } from '../lib/supabase';
 import { connectToEdge } from '../lib/api';
+import { TiSaudeLoginModal } from './tiSaudeLoginModal';
 
 interface ProfessorDashboardProps {
   user: User;
@@ -42,6 +43,7 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
   const [prontuarios, setProntuarios] = useState<any>(prontuariosFormatados);
   const [selectedProntuario, setSelectedProntuario] = useState<Prontuario | null>(null);
   const [filter, setFilter] = useState<'todos' | 'pendente' | 'aprovado' | 'recusado'>('pendente');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   async function fetchProntuarios() {
     try {
@@ -89,6 +91,7 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
   }
 
   const handleReview = async (prontuarioId: string, status: 'aprovado' | 'recusado', feedback: string) => {
+    await fetchProntuarios();
     try {
       const { error } = await supabase
         .from('prontuarios')
@@ -103,15 +106,17 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
 
       if (error) throw error;
       
-      setSelectedProntuario(null);
+      
       // conexão com o backend vem aqui
       // envia o id do prontuário ()
       const nextMove : {} = await handleApi(prontuarioId);
+      console.log(nextMove.action);
       if(nextMove.action === "RETRY") {
         alert(nextMove.message);
       }
       if(nextMove.action === "LOGIN_REQUIRED") {
         //modal de colocar as credenciais do ti saude
+        setShowLoginModal(true);
 
       }
       if(nextMove.action === "CHECK_CPF") {
@@ -119,7 +124,8 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
       }
 
       alert(`Prontuário ${status} com sucesso!`);
-      fetchProntuarios();
+      setSelectedProntuario(null);
+      await fetchProntuarios();
 
     } catch (error: any) {
       console.error('Erro ao salvar revisão:', error);
@@ -288,6 +294,14 @@ export function ProfessorDashboard({ user, onLogout }: ProfessorDashboardProps) 
           )}
         </div>
       </main>
+        <TiSaudeLoginModal 
+          open={showLoginModal} 
+          onOpenChange={setShowLoginModal}
+          onSuccess={() => {
+            // Opcional: Avisar que deu certo
+            alert("Conexão realizada! Pode aprovar novamente.");
+          }}
+        />
     </div>
   );
 }
