@@ -85,9 +85,18 @@ export function EstagiarioDashboard({ user, onLogout }: EstagiarioDashboardProps
     try {
       if (editingProntuario) {
         // Editar
+        if(editingProntuario.status === 'aprovado') {
+          alert('Não é possível editar um documento aprovado');
+          return;
+        }
         const { error } = await supabase
           .from('prontuarios')
-          .update(dadosProntuarioParaBanco)
+          .update({
+            ...dadosProntuarioParaBanco,
+            status: 'pendente',
+            feedback: null,
+            data_revisao: null
+          })
           .eq('id', editingProntuario.id);
         
         if(error) throw error;
